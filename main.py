@@ -245,18 +245,23 @@ def analyze(data: pd.DataFrame, group_var, cat_vars, cont_vars, fillna: bool = F
         "groupCounts": groupCounts
     }
 
-@app.post("/analyze")
-def run_analysis(req: AnalysisRequest):
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.api_route("/analyze", methods=["POST", "OPTIONS"])
+async def run_analysis(req: Request):
+    if req.method == "OPTIONS":
+        return JSONResponse(content={"ok": True})
+
     try:
-        df = pd.DataFrame(req.data)
-        print("✅ 轉換成 DataFrame 成功，欄位：", df.columns.tolist())
-        result = analyze(df, req.groupVar, req.catVars, req.contVars, req.fillNA)
+        body = await req.json()
+        df = pd.DataFrame(body["data"])
+        result = analyze(df, body["groupVar"], body["catVars"], body["contVars"], body.get("fillNA", False))
         return result
     except ValueError as ve:
-        # 使用者輸入錯誤類（400 Bad Request）
-        print("❌ 使用者指定錯誤：", str(ve))
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        # 程式邏輯錯誤（500）
+        import traceback
         print("❌ 系統錯誤：", traceback.format_exc())
         raise HTTPException(status_code=500, detail="伺服器內部錯誤，請聯絡系統管理者")
+
