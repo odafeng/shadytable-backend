@@ -9,6 +9,10 @@ from scipy.stats import shapiro
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
 # CORS設定，允許從http://localhost:3000的請求
 app.add_middleware(
     CORSMiddleware,
