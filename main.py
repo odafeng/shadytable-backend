@@ -13,13 +13,10 @@ app = FastAPI()
 def root():
     return {"status": "ok"}
 
-# CORS設定，允許從http://localhost:3000的請求
+# CORS設定，允許所有前端
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=
-        ["http://localhost:3000",
-        "https://shadytable-frontend.vercel.app"
-    ],
+    allow_origins=["*"], # 允許所有來源
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
